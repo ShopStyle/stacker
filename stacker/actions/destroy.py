@@ -42,10 +42,14 @@ class Action(BaseAction):
             reverse=True)
 
     def _destroy_stack(self, stack, **kwargs):
+        from pprint import pprint
+
         old_status = kwargs.get("status")
         wait_time = STACK_POLL_TIME if old_status == SUBMITTED else 0
         if self.cancel.wait(wait_time):
             return INTERRUPTED
+
+        pprint(stack)
 
         provider = self.build_provider(stack)
 
@@ -72,7 +76,9 @@ class Action(BaseAction):
             return DestroyingStatus
         else:
             logger.debug("Destroying stack: %s", stack.fqn)
-            provider.destroy_stack(provider_stack)
+            pprint(provider_stack)
+            pprint(self.context.get_stack(stack.fqn.replace('dev-', '')))
+            # provider.destroy_stack(provider_stack)
         return DestroyingStatus
 
     def pre_run(self, outline=False, *args, **kwargs):

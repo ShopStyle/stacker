@@ -139,13 +139,15 @@ class Variable(object):
         """
 
         while self.lookups:
-            try:
+#            try:
                 resolved_lookups = resolve_lookups(
                     self.lookups, context, provider)
-            except Exception as e:
-                raise FailedVariableLookup(self.name, e)
+#            except FailedVariableLookup as e:
+#                raise e
+#            except Exception as e:
+#                raise FailedVariableLookup(self.name, e)
 
-            self.replace(resolved_lookups)
+                self.replace(resolved_lookups)
 
     def replace(self, resolved_lookups):
         """Replace lookups in the Variable with their resolved values.
