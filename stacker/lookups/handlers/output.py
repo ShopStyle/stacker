@@ -1,4 +1,5 @@
 from collections import namedtuple
+from stacker.exceptions import FailedVariableLookup
 
 TYPE_NAME = "output"
 
@@ -23,7 +24,10 @@ def handler(value, context=None, **kwargs):
 
     d = deconstruct(value)
     stack = context.get_stack(d.stack_name)
-    return stack.outputs[d.output_name]
+    try:
+        return stack.outputs[d.output_name]
+    except KeyError:
+        raise KeyError("%s not in %s" % (d.output_name, stack.outputs.keys()))
 
 
 def deconstruct(value):
