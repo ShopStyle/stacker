@@ -614,7 +614,6 @@ class Provider(BaseProvider):
                 return
 
     def destroy_stack(self, stack, **kwargs):
-        from pprint import pprint
         logger.debug("Destroying stack: %s" % (self.get_stack_name(stack)))
         args = {"StackName": self.get_stack_name(stack)}
         if self.service_role:

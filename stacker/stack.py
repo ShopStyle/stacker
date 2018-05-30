@@ -3,8 +3,6 @@ import copy
 from . import util
 from .variables import (
     Variable,
-    extract_lookups,
-    resolve_lookups,
     resolve_variables,
 )
 from .lookups.handlers.output import (
@@ -118,6 +116,10 @@ class Stack(object):
         if not hasattr(self, "_retain_resources"):
             # XXX: do we want to do variable expansion here?
             """
+            from .variables import (
+                extract_lookups,
+                resolve_lookups,
+            )
             self._retain_resources = resolve_lookups(
                 extract_lookups(
                     self.definition.retain_resources,
@@ -126,7 +128,7 @@ class Stack(object):
                 provider,
             ).values()
             """
-            self._retain_resources = self.definition.retain_resources
+            self._retain_resources = self.definition.retain_resources or []
 
         return self._retain_resources
 

@@ -69,8 +69,6 @@ class Action(BaseAction):
             provider.get_stack_status(provider_stack),
         )
 
-        logger.debug("Destroying stack: %s", stack.fqn)
-
         # Below there are three checks to see if the stack has failed.
         # Unfortunately this is to handle a rather obscure corner case.
         # In order to delete a Lambda@Edge resource StackDestroy must
@@ -82,23 +80,23 @@ class Action(BaseAction):
         # https://docs.aws.amazon.com/AWSCloudFormation/latest/APIReference/API_DeleteStack.html
 
         if not provider.is_stack_failed(provider_stack):
+            logger.debug("Destroying stack: %s", stack.fqn)
             provider.destroy_stack(provider_stack)
 
         if provider.is_stack_failed(provider_stack):
             retain_resources = stack.retain_resources(self.provider)
-            if len(retain_resources):
-                provider_stack[u'RetainResources'] = retain_resources
-                provider.destroy_stack(provider_stack)
-                return DestroyedStatus
+            if len(retain_resources) == 0:
+                # No fallback avaliable
+                return DestroyFailed
+            provider_stack[u'RetainResources'] = retain_resources
+            provider.destroy_stack(provider_stack)
+            return DestroyedStatus
 
         if provider.is_stack_destroyed(provider_stack):
             return DestroyedStatus
 
         if provider.is_stack_in_progress(provider_stack):
             return DestroyingStatus
-
-        if provider.is_stack_failed(provider_stack):
-            return DestroyFailed
 
         return DestroyingStatus
 
