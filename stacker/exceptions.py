@@ -23,6 +23,13 @@ class UnknownLookupType(Exception):
         super(UnknownLookupType, self).__init__(message, *args, **kwargs)
 
 
+class InterpolationFailed(Exception):
+
+    def __init__(self, variable_name, *args, **kwargs):
+        message = "Interpolation for variable `%s` failed." % variable_name
+        super(InterpolationFailed, self).__init__(message, *args, **kwargs)
+
+
 class FailedVariableLookup(Exception):
 
     def __init__(self, variable_name, error, *args, **kwargs):

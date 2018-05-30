@@ -1,4 +1,7 @@
-from ..exceptions import UnknownLookupType
+from ..exceptions import (
+    InterpolationFailed,
+    UnknownLookupType,
+)
 from ..util import load_object_from_string
 
 from .handlers import output
@@ -60,6 +63,8 @@ def resolve_lookups(lookups, context, provider):
     """
     resolved_lookups = {}
     for lookup in lookups:
+        if lookup.type is None:
+            raise InterpolationFailed(lookup.input)
         try:
             handler = LOOKUP_HANDLERS[lookup.type]
         except KeyError:
