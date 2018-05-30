@@ -3,6 +3,8 @@ import copy
 from . import util
 from .variables import (
     Variable,
+    extract_lookups,
+    resolve_lookups,
     resolve_variables,
 )
 from .lookups.handlers.output import (
@@ -111,6 +113,22 @@ class Stack(object):
                     self._stack_policy = f.read()
 
         return self._stack_policy
+
+    def retain_resources(self, provider):
+        if not hasattr(self, "_retain_resources"):
+            # XXX: do we want to do variable expansion here?
+            """
+            self._retain_resources = resolve_lookups(
+                extract_lookups(
+                    self.definition.retain_resources,
+                ),
+                self.context,
+                provider,
+            ).values()
+            """
+            self._retain_resources = self.definition.retain_resources
+
+        return self._retain_resources
 
     @property
     def blueprint(self):
