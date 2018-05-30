@@ -372,6 +372,9 @@ A stack has the following keys:
   that will be applied when the CloudFormation stack is created and updated.
   You can use stack policies to prevent CloudFormation from making updates to
   protected resources (e.g. databases). See: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/protect-stack-resources.html
+**retain_resources**:
+  (optional): If provided, specifies a list of resources to retain when deleting
+  a stack. See https://docs.aws.amazon.com/AWSCloudFormation/latest/APIReference/API_DeleteStack.html
 
 Stacks Example
 ~~~~~~~~~~~~~~

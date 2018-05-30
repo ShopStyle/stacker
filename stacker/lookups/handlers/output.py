@@ -23,7 +23,11 @@ def handler(value, context=None, **kwargs):
         raise ValueError('Context is required')
 
     d = deconstruct(value)
+
     stack = context.get_stack(d.stack_name)
+    if stack.outputs is None:
+        raise ValueError("No outputs for %s" % (d.stack_name))
+
     try:
         return stack.outputs[d.output_name]
     except KeyError:

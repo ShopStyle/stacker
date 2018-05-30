@@ -6,6 +6,7 @@ from ..exceptions import StackDoesNotExist
 from .. import util
 from ..status import (
     CompleteStatus,
+    FailedStatus,
     SubmittedStatus,
     SUBMITTED,
     INTERRUPTED
@@ -17,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 DestroyedStatus = CompleteStatus("stack destroyed")
 DestroyingStatus = SubmittedStatus("submitted for destruction")
+DestroyFailed = FailedStatus("stack destroy failed")
 
 
 class Action(BaseAction):
@@ -66,13 +68,36 @@ class Action(BaseAction):
             provider.get_stack_name(provider_stack),
             provider.get_stack_status(provider_stack),
         )
-        if provider.is_stack_destroyed(provider_stack):
-            return DestroyedStatus
-        elif provider.is_stack_in_progress(provider_stack):
-            return DestroyingStatus
-        else:
+
+        # Below there are three checks to see if the stack has failed.
+        # Unfortunately this is to handle a rather obscure corner case.
+        # In order to delete a Lambda@Edge resource StackDestroy must
+        # be called twice. Once without RetainResources, then again with
+        # RetainResources since the stack _must_ be in a failed state for
+        # RetainResources to work. The checks are there to make this
+        # function idempotent across stacker destroy runs.
+        #
+        # https://docs.aws.amazon.com/AWSCloudFormation/latest/APIReference/API_DeleteStack.html
+
+        if not provider.is_stack_failed(provider_stack):
             logger.debug("Destroying stack: %s", stack.fqn)
             provider.destroy_stack(provider_stack)
+
+        if provider.is_stack_failed(provider_stack):
+            retain_resources = stack.retain_resources(self.provider)
+            if len(retain_resources) == 0:
+                # No fallback avaliable
+                return DestroyFailed
+            provider_stack[u'RetainResources'] = retain_resources
+            provider.destroy_stack(provider_stack)
+            return DestroyedStatus
+
+        if provider.is_stack_destroyed(provider_stack):
+            return DestroyedStatus
+
+        if provider.is_stack_in_progress(provider_stack):
+            return DestroyingStatus
+
         return DestroyingStatus
 
     def pre_run(self, outline=False, *args, **kwargs):
