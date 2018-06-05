@@ -328,7 +328,10 @@ A stack has the following keys:
 **variables:**
   A dictionary of Variables_ to pass into the Blueprint when rendering the
   CloudFormation template. Variables_ can be any valid YAML data
-  structure.
+  structure or you can use the !include tag to include another yaml file.
+  ```
+  variables: !include <filename>
+  ```
 **locked:**
   (optional) If set to true, the stack is locked and will not be
   updated unless the stack is passed to stacker via the *--force* flag.
