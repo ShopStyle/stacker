@@ -609,12 +609,14 @@ class SourceProcessor(object):
 
     def get_package_sources(self):
         """Make remote python packages available for local use."""
+        paths = []
         # Checkout S3 repositories specified in config
         for config in self.sources.get('s3', []):
-            self.fetch_s3_package(config=config)
+            paths.append(self.fetch_s3_package(config=config))
         # Checkout git repositories specified in config
         for config in self.sources.get('git', []):
-            self.fetch_git_package(config=config)
+            paths.append(self.fetch_git_package(config=config))
+        return paths
 
     def fetch_s3_package(self, config):
         """Make a remote S3 archive available for local use.
@@ -753,6 +755,7 @@ class SourceProcessor(object):
         # Update sys.path & merge in remote configs (if necessary)
         self.update_paths_and_config(config=config,
                                      pkg_dir_name=dir_name)
+        return os.path.join(self.package_cache_dir, dir_name)
 
     def update_paths_and_config(self, config, pkg_dir_name):
         """Handle remote source defined sys.paths & configs.
@@ -804,7 +807,7 @@ class SourceProcessor(object):
             logger.debug("Matching commit id found: %s", commit_id)
             return commit_id
         else:
-            raise ValueError("Ref \"%s\" not found for repo %d." % (ref, uri))
+            raise ValueError("Ref \"%s\" not found for repo %s." % (ref, str(uri)))
 
     def determine_git_ls_remote_ref(self, config):
         """Determine the ref to be used with the "git ls-remote" command.

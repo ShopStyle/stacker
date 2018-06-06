@@ -214,7 +214,7 @@ def process_remote_sources(raw_config, environment=None):
     config = yaml.safe_load(raw_config)
     if config and config.get('package_sources'):
         processor = SourceProcessor(
-            sources=config['package_sources'],
+            config['package_sources'],
             stacker_cache_dir=config.get('stacker_cache_dir')
         )
         processor.get_package_sources()
