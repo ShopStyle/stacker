@@ -8,10 +8,12 @@ from zipfile import ZipFile, ZIP_DEFLATED
 import botocore
 from functools import partial
 import formic
-from troposphere.awslambda import Code
-from stacker.session_cache import get_session
 
+from troposphere.awslambda import Code
+
+from stacker.session_cache import get_session
 from stacker.util import (
+    SourceProcessor,
     get_config_directory,
     ensure_s3_bucket,
 )
@@ -496,6 +498,15 @@ def upload_lambda_functions(context, provider, **kwargs):
 
     results = {}
     for name, options in kwargs['functions'].items():
+
+        if options['source']:
+            processor = SourceProcessor(
+                sources=options['source'],
+                stacker_cache_dir=options.get('cache_dir')
+            )
+            paths = processor.get_package_sources()
+            options['path'] = paths[0]
+
         results[name] = _upload_function(s3_client, bucket_name, prefix, name,
                                          options, follow_symlinks)
 
