@@ -151,10 +151,14 @@ def _zip_from_file_patterns(root, includes, excludes, follow_symlinks):
     """
     logger.info('lambda: base directory: %s', root)
 
-    files = list(_find_files(root, includes, excludes, follow_symlinks))
-    if not files:
-        raise RuntimeError('Empty list of files for Lambda payload. Check '
-                           'your include/exclude options for errors.')
+    if os.path.isfile(root):
+        root, _file = os.path.split(root)
+        files = [_file]
+    else:
+        files = list(_find_files(root, includes, excludes, follow_symlinks))
+        if not files:
+            raise RuntimeError('Empty list of files for Lambda payload. Check '
+                               'your include/exclude options for errors.')
 
     logger.info('lambda: adding %d files:', len(files))
 
@@ -297,6 +301,7 @@ def _upload_function(s3_conn, bucket, prefix, name, options, follow_symlinks):
         botocore.exceptions.ClientError: any error from boto3 is passed
             through.
     """
+
     try:
         root = os.path.expanduser(options['path'])
     except KeyError as e:
@@ -505,7 +510,13 @@ def upload_lambda_functions(context, provider, **kwargs):
                 stacker_cache_dir=options.get('cache_dir')
             )
             paths = processor.get_package_sources()
-            options['path'] = paths[0]
+
+            if 'path' in options:
+                path = options['path']
+                if path != '':
+                    options['path'] = os.path.join(paths[0], path)
+            else:
+                options['path'] = paths[0]
 
         results[name] = _upload_function(s3_client, bucket_name, prefix, name,
                                          options, follow_symlinks)
