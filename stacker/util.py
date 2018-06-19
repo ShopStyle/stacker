@@ -748,9 +748,13 @@ class SourceProcessor(object):
                 shutil.rmtree(tmp_dir)
         else:
             logger.debug("Remote repo %s appears to have been previously "
-                         "cloned to %s -- bypassing download",
+                         "cloned to %s",
                          config['uri'],
                          cached_dir_path)
+            with Repo(cached_dir_path) as repo:
+                repo.heads.master.checkout()
+                repo.remotes.origin.pull()
+                repo.commit(ref)
 
         # Update sys.path & merge in remote configs (if necessary)
         self.update_paths_and_config(config=config,
