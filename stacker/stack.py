@@ -112,6 +112,26 @@ class Stack(object):
 
         return self._stack_policy
 
+    def retain_resources(self, provider):
+        if not hasattr(self, "_retain_resources"):
+            # XXX: do we want to do variable expansion here?
+            """
+            from .variables import (
+                extract_lookups,
+                resolve_lookups,
+            )
+            self._retain_resources = resolve_lookups(
+                extract_lookups(
+                    self.definition.retain_resources,
+                ),
+                self.context,
+                provider,
+            ).values()
+            """
+            self._retain_resources = self.definition.retain_resources or []
+
+        return self._retain_resources
+
     @property
     def blueprint(self):
         if not hasattr(self, "_blueprint"):

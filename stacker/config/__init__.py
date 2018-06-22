@@ -1,4 +1,5 @@
 import copy
+import functools
 import sys
 import logging
 
@@ -184,6 +185,15 @@ def dump(config):
         allow_unicode=True)
 
 
+def handle_yaml_include_tag(environment, self, node):
+
+    filename = self.construct_scalar(node)
+    with open(filename, 'r') as f:
+        pre_rendered = render(f.read(), environment)
+        rendered = process_remote_sources(pre_rendered, environment)
+        return yaml.safe_load(rendered)
+
+
 def process_remote_sources(raw_config, environment=None):
     """Stage remote package sources and merge in remote configs.
 
@@ -197,10 +207,14 @@ def process_remote_sources(raw_config, environment=None):
 
     """
 
+    partial = functools.partial(handle_yaml_include_tag, environment)
+    yaml.Loader.add_constructor('!include', partial)
+    yaml.SafeLoader.add_constructor('!include', partial)
+
     config = yaml.safe_load(raw_config)
     if config and config.get('package_sources'):
         processor = SourceProcessor(
-            sources=config['package_sources'],
+            config['package_sources'],
             stacker_cache_dir=config.get('stacker_cache_dir')
         )
         processor.get_package_sources()
@@ -300,6 +314,8 @@ class Stack(Model):
     tags = DictType(StringType, serialize_when_none=False)
 
     stack_policy_path = StringType(serialize_when_none=False)
+
+    retain_resources = ListType(StringType, serialize_when_none=False)
 
     def validate_class_path(self, data, value):
         if value and data["template_path"]:

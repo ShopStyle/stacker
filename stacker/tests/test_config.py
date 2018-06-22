@@ -1,3 +1,4 @@
+import os
 import sys
 import unittest
 
@@ -532,6 +533,18 @@ stacks:
         """
         with self.assertRaises(ConstructorError):
             parse(yaml_config)
+
+    def test_render_parse_load_yaml_include(self):
+        conf = """
+        stacks:
+        - name: vpc
+          class_path: blueprints.VPC
+          variables: !include {basepath}/templates/test_render_parse_load_yaml_include.yaml
+         """.format(basepath=os.path.split(os.path.realpath(__file__))[0])
+        config = render_parse_load(
+            conf, environment={"namespace": "prod"}, validate=False)
+        config.validate()
+        self.assertEquals(config.stacks[0].variables['Subsitutions'], ["prod"])
 
 
 if __name__ == '__main__':

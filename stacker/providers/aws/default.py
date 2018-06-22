@@ -619,6 +619,11 @@ class Provider(BaseProvider):
         if self.service_role:
             args["RoleARN"] = self.service_role
 
+        try:
+            args["RetainResources"] = stack["RetainResources"]
+        except KeyError:
+            pass
+
         self.cloudformation.delete_stack(**args)
         return True
 
