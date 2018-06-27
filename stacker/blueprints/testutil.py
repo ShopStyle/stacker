@@ -25,6 +25,9 @@ def diff(a, b):
 class BlueprintTestCase(unittest.TestCase):
     OUTPUT_PATH = "tests/fixtures/blueprints"
 
+    def generate_variables(self):
+        return [Variable(k, v) for k, v in self.common_variables.items()]
+
     def assertRenderedBlueprint(self, blueprint):  # noqa: N802
         expected_output = "%s/%s.json" % (self.OUTPUT_PATH, blueprint.name)
 
