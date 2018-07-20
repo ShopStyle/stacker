@@ -8,6 +8,8 @@ from zipfile import ZipFile, ZIP_DEFLATED
 import botocore
 from functools import partial
 import formic
+import subprocess
+import sys
 
 from troposphere.awslambda import Code
 
@@ -320,6 +322,12 @@ def _upload_function(s3_conn, bucket, prefix, name, options, follow_symlinks):
     # absolute path, which is exactly what we want.
     if not os.path.isabs(root):
         root = os.path.abspath(os.path.join(get_config_directory(), root))
+
+    requirements = os.path.join(root, 'requirements.txt')
+    if os.path.exists(requirements):
+        subprocess.check_output([
+            sys.executable, '-m', 'pip', 'install', '-t', root, '-r', requirements])
+
     zip_contents, content_hash = _zip_from_file_patterns(root,
                                                          includes,
                                                          excludes,
