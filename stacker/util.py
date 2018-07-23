@@ -761,7 +761,8 @@ class SourceProcessor(object):
             with Repo(cached_dir_path) as repo:
                 repo.heads.master.checkout()
                 repo.remotes.origin.pull()
-                repo.commit(ref)
+                repo.head.reference = ref
+                repo.head.reset(index=True, working_tree=True)
 
         # Update sys.path & merge in remote configs (if necessary)
         self.update_paths_and_config(config=config,

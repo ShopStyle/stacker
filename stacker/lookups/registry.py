@@ -63,17 +63,20 @@ def resolve_lookups(lookups, context, provider):
     """
     resolved_lookups = {}
     for lookup in lookups:
-        if lookup.type is None:
-            raise InterpolationFailed(lookup.input)
-        try:
-            handler = LOOKUP_HANDLERS[lookup.type]
-        except KeyError:
-            raise UnknownLookupType(lookup)
-        resolved_lookups[lookup] = handler(
-            value=lookup.input,
-            context=context,
-            provider=provider,
-        )
+        if lookup.input.startswith('AWS::'):
+            resolved_lookups[lookup] = lookup.input
+        else:
+            if lookup.type is None:
+                raise InterpolationFailed(lookup.input)
+            try:
+                handler = LOOKUP_HANDLERS[lookup.type]
+            except KeyError:
+                raise UnknownLookupType(lookup)
+            resolved_lookups[lookup] = handler(
+                value=lookup.input,
+                context=context,
+                provider=provider,
+            )
     return resolved_lookups
 
 

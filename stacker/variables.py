@@ -139,11 +139,11 @@ class Variable(object):
         """
 
         while self.lookups:
-            try:
-                resolved_lookups = resolve_lookups(
-                    self.lookups, context, provider)
-            except Exception as e:
-                raise FailedVariableLookup(self.name, e)
+#            try:
+            resolved_lookups = resolve_lookups(
+                self.lookups, context, provider)
+#            except Exception as e:
+#                raise FailedVariableLookup(self.name, e)
 
             self.replace(resolved_lookups)
 
