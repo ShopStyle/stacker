@@ -25,6 +25,9 @@ stacker
 
 For full documentation, please see the readthedocs_ site.
 
+`Click here to join the Slack team`_ for stacker, and then join the #stacker
+channel!
+
 About
 =====
 
@@ -43,6 +46,7 @@ Requirements
 ============
 
 * Python 2.7
+* Python 3.5+(evaluation purpose only)
 
 Stacker Command
 ===============
@@ -69,4 +73,4 @@ want to avoid setting up a python environment::
 .. _troposphere: https://github.com/cloudtools/troposphere
 .. _string.Template: https://docs.python.org/2/library/string.html#template-strings
 .. _readthedocs: http://stacker.readthedocs.io/en/latest/
-
+.. _`Click here to join the Slack team`: https://empire-slack.herokuapp.com

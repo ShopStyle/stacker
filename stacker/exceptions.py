@@ -1,3 +1,8 @@
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+
+
 class InvalidConfig(Exception):
     def __init__(self, errors):
         super(InvalidConfig, self).__init__(errors)
@@ -19,6 +24,7 @@ class InvalidLookupCombination(Exception):
 class UnknownLookupType(Exception):
 
     def __init__(self, lookup, *args, **kwargs):
+        self.lookup = lookup
         message = "Unknown lookup type: \"{}\"".format(lookup.type)
         super(UnknownLookupType, self).__init__(message, *args, **kwargs)
 
@@ -32,9 +38,12 @@ class InterpolationFailed(Exception):
 
 class FailedVariableLookup(Exception):
 
-    def __init__(self, variable_name, error, *args, **kwargs):
-        message = "Couldn't resolve lookups in variable `%s`. " % variable_name
-        message += "%s" % error
+    def __init__(self, variable_name, lookup, error, *args, **kwargs):
+        self.lookup = lookup
+        self.error = error
+        message = "Couldn't resolve lookup in variable `%s`, " % variable_name
+        message += "lookup: ${%s}: " % lookup.raw
+        message += "(%s) %s" % (error.__class__, error)
         super(FailedVariableLookup, self).__init__(message, *args, **kwargs)
 
 
@@ -234,7 +243,8 @@ class GraphError(Exception):
         self.stack = stack
         self.dependency = dependency
         self.exception = exception
-        message = ("Error detected when adding '%s' "
-                   "as a dependency of '%s': %s") % (
-                           dependency, stack, exception.message)
+        message = (
+            "Error detected when adding '%s' "
+            "as a dependency of '%s': %s"
+        ) % (dependency, stack, str(exception))
         super(GraphError, self).__init__(message)

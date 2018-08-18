@@ -1,3 +1,7 @@
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from builtins import next
 import os
 import sys
 import unittest
@@ -91,16 +95,6 @@ class TestConfig(unittest.TestCase):
             stack_errors['class_path'][0].__str__(),
             "template_path cannot be present when class_path is provided.")
 
-    def test_config_validate_no_stacks(self):
-        config = Config({"namespace": "prod"})
-        with self.assertRaises(exceptions.InvalidConfig) as ex:
-            config.validate()
-
-        error = ex.exception.errors['stacks'].errors[0]
-        self.assertEquals(
-            error.__str__(),
-            "Should have more than one element.")
-
     def test_config_validate_missing_name(self):
         config = Config({
             "namespace": "prod",
@@ -136,7 +130,7 @@ class TestConfig(unittest.TestCase):
     def test_dump_unicode(self):
         config = Config()
         config.namespace = "test"
-        self.assertEquals(dump(config), """namespace: test
+        self.assertEquals(dump(config), b"""namespace: test
 stacks: []
 """)
 
@@ -144,8 +138,8 @@ stacks: []
         # Ensure that we're producing standard yaml, that doesn't include
         # python specific objects.
         self.assertNotEquals(
-            dump(config), "namespace: !!python/unicode 'test'\n")
-        self.assertEquals(dump(config), """namespace: test
+            dump(config), b"namespace: !!python/unicode 'test'\n")
+        self.assertEquals(dump(config), b"""namespace: test
 stacks: []
 """)
 
@@ -243,6 +237,10 @@ stacks: []
             - bucket: anotherexamplebucket
               key: example-blueprints-v3.tar.gz
               use_latest: false
+              paths:
+                - foo
+              configs:
+                - foo/config.yml
           git:
             - uri: git@github.com:acmecorp/stacker_blueprints.git
             - uri: git@github.com:remind101/stacker_blueprints.git
@@ -253,6 +251,10 @@ stacks: []
               branch: staging
             - uri: git@github.com:contoso/foo.git
               commit: 12345678
+              paths:
+                - bar
+              configs:
+                - bar/moreconfig.yml
         tags:
           environment: production
         stacks:
@@ -308,6 +310,10 @@ stacks: []
             - bucket: anotherexamplebucket
               key: example-blueprints-v3.tar.gz
               use_latest: false
+              paths:
+                - foo
+              configs:
+                - foo/config.yml
           git:
             - uri: git@github.com:acmecorp/stacker_blueprints.git
             - uri: git@github.com:remind101/stacker_blueprints.git
@@ -318,6 +324,10 @@ stacks: []
               branch: staging
             - uri: git@github.com:contoso/foo.git
               commit: 12345678
+              paths:
+                - bar
+              configs:
+                - bar/moreconfig.yml
         tags:
           environment: production
         stacks:
@@ -421,7 +431,7 @@ stacks: []
                     "class_path": "blueprints.Bastion",
                     "requires": ["vpc"]})]})
 
-        self.assertEqual(dump(config), """namespace: prod
+        self.assertEqual(dump(config), b"""namespace: prod
 stacks:
 - class_path: blueprints.VPC
   enabled: true
@@ -545,6 +555,20 @@ stacks:
             conf, environment={"namespace": "prod"}, validate=False)
         config.validate()
         self.assertEquals(config.stacks[0].variables['Subsitutions'], ["prod"])
+
+    def test_parse_invalid_inner_keys(self):
+        yaml_config = """
+        namespace: prod
+        stacks:
+        - name: vpc
+          class_path: blueprints.VPC
+          garbage: yes
+          variables:
+            Foo: bar
+        """
+
+        with self.assertRaises(exceptions.InvalidConfig):
+            parse(yaml_config)
 
 
 if __name__ == '__main__':

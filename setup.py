@@ -1,37 +1,39 @@
 import os
 from setuptools import setup, find_packages
 
-VERSION = "1.3.0"
+
+VERSION = "1.4.0"
 
 src_dir = os.path.dirname(__file__)
 
 install_requires = [
+    "future",
     "troposphere>=1.9.0",
     "botocore>=1.6.0",
     "boto3>=1.3.1",
-    "PyYAML~=3.12",
+    "PyYAML>=3.12",
     "awacs>=0.6.0",
-    "formic~=0.9b",
     "gitpython~=2.0",
     "schematics~=2.0.1",
+    "formic2",
+    "python-dateutil~=2.0",
 ]
 
 tests_require = [
     "mock~=2.0.0",
     "moto~=1.1.24",
     "testfixtures~=4.10.0",
-    "coverage~=4.3.4"
+    "coverage~=4.3.4",
+    "flake8-future-import",
 ]
 
-setup_requires = [
-    "nose",
-]
+setup_requires = ["nose"]
 
 scripts = [
     "scripts/compare_env",
     "scripts/docker-stacker",
     "scripts/stacker.cmd",
-    "scripts/stacker"
+    "scripts/stacker",
 ]
 
 
@@ -57,4 +59,12 @@ if __name__ == "__main__":
         tests_require=tests_require,
         setup_requires=setup_requires,
         test_suite="nose.collector",
+        classifiers=(
+            "Development Status :: 5 - Production/Stable",
+            "Environment :: Console",
+            "License :: OSI Approved :: BSD License",
+            "Programming Language :: Python :: 2.7",
+            "Programming Language :: Python :: 3.5",
+            "Programming Language :: Python :: 3.6",
+        ),
     )
