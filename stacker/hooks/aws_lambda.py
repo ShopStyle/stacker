@@ -531,3 +531,7 @@ def upload_lambda_functions(context, provider, **kwargs):
                                          options, follow_symlinks)
 
     return results
+
+
+def lambda_code(context, provider, S3Bucket=None, S3Key=None):
+    return {'code': Code(S3Bucket=S3Bucket, S3Key=S3Key)}
